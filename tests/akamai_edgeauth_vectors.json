@@ -1,0 +1,76 @@
+{
+  "description": "Reference tokens produced by akamai-edgeauth 0.3.2 (akamai/EdgeAuth-Token-Python) for fixed inputs. The keys are public test values used only by this test suite.",
+  "vectors": [
+    {
+      "name": "acl_sha256",
+      "mode": "acl",
+      "path": "/live/channel1/*",
+      "key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "algorithm": "sha256",
+      "end_time": 1790000300,
+      "expected": "exp=1790000300~acl=/live/channel1/*~hmac=878fc203867895600a527eaa5c752ca12508cc1015a7814fd831c5c369b1d0fe"
+    },
+    {
+      "name": "acl_multi",
+      "mode": "acl",
+      "path": "/live/a/*!/live/b/*",
+      "key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "algorithm": "sha256",
+      "end_time": 1790000300,
+      "expected": "exp=1790000300~acl=/live/a/*!/live/b/*~hmac=dfa2cdfb05ae4ddd000c54a6ce7472785fde0ee94a5e74fac8691f1f5c46f236"
+    },
+    {
+      "name": "acl_with_start_ip_id_data",
+      "mode": "acl",
+      "path": "/vod/*",
+      "key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "algorithm": "sha256",
+      "start_time": 1790000000,
+      "end_time": 1790000300,
+      "ip": "203.0.113.7",
+      "session_id": "user-42",
+      "payload": "plan1",
+      "expected": "ip=203.0.113.7~st=1790000000~exp=1790000300~acl=/vod/*~id=user-42~data=plan1~hmac=c47cb0950b7b08e573efc29c63d6949ce1b61fb12551272ddde6b5b8b2c37ff9"
+    },
+    {
+      "name": "url_sha256",
+      "mode": "url",
+      "path": "/files/video.mp4",
+      "key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "algorithm": "sha256",
+      "end_time": 1790000300,
+      "expected": "exp=1790000300~hmac=62219e450343acb7d0ed221835d3eba77f96368704a1004cbb7c7f874850d64f"
+    },
+    {
+      "name": "url_escape_early",
+      "mode": "url",
+      "path": "/files/my video.mp4",
+      "key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "algorithm": "sha256",
+      "end_time": 1790000300,
+      "escape_early": true,
+      "session_id": "a b/c",
+      "expected": "exp=1790000300~id=a+b%2fc~hmac=43f6008de03814978f3f652a8d55840ff1efb99c56f2740278e8a1e7c49b02c8"
+    },
+    {
+      "name": "acl_sha1",
+      "mode": "acl",
+      "path": "/live/*",
+      "key": "0123456789abcdef0123456789abcdef",
+      "algorithm": "sha1",
+      "end_time": 1790000300,
+      "expected": "exp=1790000300~acl=/live/*~hmac=f8b58c72c0a5cc382749495d2219e716a0d746f2"
+    },
+    {
+      "name": "url_md5",
+      "mode": "url",
+      "path": "/files/a.mp4",
+      "key": "0123456789abcdef0123456789abcdef",
+      "algorithm": "md5",
+      "end_time": 1790000300,
+      "ip": "2001:db8::1",
+      "escape_early": true,
+      "expected": "ip=2001%3adb8%3a%3a1~exp=1790000300~hmac=5112b4d28102c9f43a7be052c76f5a7c"
+    }
+  ]
+}
