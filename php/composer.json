@@ -1,0 +1,14 @@
+{
+    "name": "medianova/secure-token",
+    "description": "Medianova Secure Token generator (Akamai EdgeAuth compatible)",
+    "type": "library",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "files": ["MedianovaToken.php"]
+    },
+    "scripts": {
+        "test": "php tests/run_tests.php"
+    }
+}

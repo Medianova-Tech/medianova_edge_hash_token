@@ -8,6 +8,8 @@ token name and settings on the Medianova resource.
 
 - One file, Python standard library only, Python 3.8 or newer.
 - Use it as a library in your backend or as a command line tool.
+- A PHP version with the same output is in [`php/`](php/README.md). It keeps the method names of
+  Akamai's EdgeAuth PHP class.
 
 ## How it works
 
@@ -149,11 +151,40 @@ backend and reloading the source.
 
 If your player page and the CDN hostname are on different sites:
 
-- Configure your player origins on the resource ("CORS allowed origins", for example
-  `https://player.example.com`).
-- Send requests with credentials, for example `withCredentials: true` in dash.js.
+- Configure your player origins on the resource ("CORS allowed origins"), for example
+  `https://player.example.com`. A subdomain wildcard such as `https://*.example.com` covers every
+  subdomain (not `example.com` itself); scheme and port must match.
+- Configure the player to send requests with credentials (see below). Players do not do this by
+  default, so the browser does not send the session cookie and segment requests fail.
 - Browsers that block third-party cookies may drop the session cookie. A CDN hostname under your own
   domain (for example `cdn.example.com` for `www.example.com`) avoids this.
+
+Configure credentials **before** you load the source.
+
+dash.js (v4 and v5):
+
+```js
+const player = dashjs.MediaPlayer().create();
+player.initialize(videoElement, null, true);
+['MPD', 'MediaSegment', 'InitializationSegment', 'IndexSegment']
+  .forEach((type) => player.setXHRWithCredentialsForType(type, true));
+player.attachSource(signedMpdUrl);
+```
+
+Shaka Player:
+
+```js
+const player = new shaka.Player();
+await player.attach(videoElement);
+player.getNetworkingEngine().registerRequestFilter((type, request) => {
+  request.allowCrossSiteCredentials = true;
+});
+await player.load(signedMpdUrl);
+```
+
+If credentials are missing, the browser console shows a CORS error for the segments, for example
+`No 'Access-Control-Allow-Origin' header is present on the requested resource`. The real cause is a
+`403` response: the segment request arrived without the session cookie.
 
 ### Without sessions
 
@@ -180,7 +211,9 @@ The CDN does not tell the client why a token was rejected. Check these first:
 | Every request fails | Wrong key, algorithm, token name or escape-early setting |
 | Works, then fails after a while | Token or session expired; clock difference on your server |
 | Manifest works, segments fail (HLS) | Player changes `User-Agent` / session headers, or playlists use absolute URIs on another host |
-| Manifest works, segments fail (DASH) | Cookie not sent: missing `withCredentials`, origin not allowed, third-party cookies blocked |
+| Manifest works, segments fail (DASH) | Cookie not sent: player credentials not enabled, origin not allowed, third-party cookies blocked |
+| Browser reports a CORS error on DASH segments | Same as above: the segment got `403` because the cookie was not sent |
+| Manifest and segments return `200`, live stream does not start | No new segments at the live edge: check that the encoder is still publishing |
 | URL token fails | Path differs from the requested one (encoding, trailing slash, host or query string included) |
 | ACL token fails on some files | Path outside the ACL pattern |
 | IP-bound token fails | Viewer IP differs (mobile networks, proxies, IPv4/IPv6) |
